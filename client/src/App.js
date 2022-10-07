@@ -1,13 +1,41 @@
 import "./App.css";
-import ResponsiveAppBar from "./components/ResponsiveAppBar";
-import Carousel from "./components/Carousel";
+import ResponsiveAppBar from "./Components/ResponsiveAppBar";
+import Carousel from "./Components/Carousel";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
 import { Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 
+import {useState, useEffect} from 'react';
+import { Test } from './Components/Test'
+
 function App() {
+
+
+
+  // added this for testing
+  // start of test
+  const [initialState, setState] = useState([])
+
+  const url = '/api'
+
+  useEffect(()=> {
+    fetch(url).then(response => {
+      if(response.status === 200){
+        return response.json()
+      }
+    }).then(data => setState(data))
+  }, [])
+  // end of test
+
+
   return (
+    <>
+    <div className="App">
+      <header>
+        <Test data={initialState}/>
+      </header>
+    </div>
     <Stack
       direction="column"
       justifyContent="center"
@@ -36,6 +64,7 @@ function App() {
         </Grid>
       </Container>
     </Stack>
+    </>
   );
 }
 

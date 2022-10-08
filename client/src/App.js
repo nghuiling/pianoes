@@ -13,8 +13,8 @@ function App() {
 
 
 
-  // added this for testing
-  // start of test
+  // // added this for testing
+  // // start of test
   const [initialState, setState] = useState([])
 
   const url = '/api'
@@ -26,16 +26,18 @@ function App() {
       }
     }).then(data => setState(data))
   }, [])
-  // end of test
+  // // end of test
 
 
   return (
     <>
+    {/* testing start */}
     <div className="App">
       <header>
         <Test data={initialState}/>
       </header>
     </div>
+      {/* testing end */}
     <Stack
       direction="column"
       justifyContent="center"

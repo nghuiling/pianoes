@@ -1,6 +1,7 @@
 // testing link to flask server
 import React from 'react';
 
+
 export const Test = ({data})=> {
     return(
         <div>

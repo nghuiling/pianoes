@@ -1,10 +1,8 @@
 import './App.css';
 import ResponsiveAppBar from './Components/ResponsiveAppBar';
-import Carousel from './Components/Carousel';
 import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
-import { Typography } from '@mui/material';
-import Grid from '@mui/material/Grid';
+import { Outlet, Link } from 'react-router-dom';
 
 import { useState, useEffect } from 'react';
 import { Test } from './Components/Test';
@@ -13,21 +11,21 @@ import { get } from './Adapters/base';
 function App() {
   // // added this for testing
   // // start of test
-  const [initialState, setState] = useState([]);
+  // const [initialState, setState] = useState([]);
 
-  useEffect(() => {
-    get().then((data) => setState(data));
-  }, []);
+  // useEffect(() => {
+  //   get().then((data) => setState(data));
+  // }, []);
   // // end of test
 
   return (
     <>
       {/* testing start */}
-      <div className='App'>
+      {/* <div className='App'>
         <header>
           <Test data={initialState} />
         </header>
-      </div>
+      </div> */}
       {/* testing end */}
       <Stack
         direction='column'
@@ -45,16 +43,7 @@ function App() {
             alignItems: 'center',
           }}
         >
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Typography variant='h5' sx={{ textAlign: 'center' }}>
-                Select a sheet music to play
-              </Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Carousel />
-            </Grid>
-          </Grid>
+          <Outlet />
         </Container>
       </Stack>
     </>

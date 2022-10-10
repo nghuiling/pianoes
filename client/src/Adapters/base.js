@@ -10,6 +10,7 @@ export function get(path) {
       throw new Error('Something went wrong');
     })
     .catch((error) => {
-      return { status: 400 };
+      // create toast then throw error { status: 400 };
+      throw new Error(error);
     });
 }

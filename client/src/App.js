@@ -2,11 +2,10 @@ import './App.css';
 import ResponsiveAppBar from './Components/ResponsiveAppBar';
 import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 
-import { useState, useEffect } from 'react';
-import { Test } from './Components/Test';
-import { get } from './Adapters/base';
+// import { Test } from './Components/Test';
+// import { get } from './Adapters/base';
 
 function App() {
   // // added this for testing

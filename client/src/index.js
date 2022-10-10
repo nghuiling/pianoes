@@ -8,14 +8,12 @@ import SheetView from './Pages/SheetView';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<App />}>
-          <Route path='/' element={<SheetList />} />
-          <Route path='/sheet/id' element={<SheetView />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  </React.StrictMode>
+  <BrowserRouter>
+    <Routes>
+      <Route path='/' element={<App />}>
+        <Route path='/' element={<SheetList />} />
+        <Route path='/sheet/id' element={<SheetView />} />
+      </Route>
+    </Routes>
+  </BrowserRouter>
 );

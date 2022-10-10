@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Typography } from '@mui/material';
-import Stave from '../Components/Stave';
+import CustomStave from '../Components/CustomStave';
 
 export default function MusicSelect() {
   const staveNotes = [
@@ -16,7 +16,7 @@ export default function MusicSelect() {
         </Typography>
       </Grid>
       <Grid item xs={12}>
-        <Stave notes={staveNotes}></Stave>
+        <CustomStave notes={staveNotes}></CustomStave>
       </Grid>
     </Grid>
   );

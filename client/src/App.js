@@ -34,6 +34,7 @@ function App() {
       >
         <ResponsiveAppBar />
         <Container
+          className='fancy-bg'
           maxWidth='lg'
           sx={{
             flexGrow: 1,

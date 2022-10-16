@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Typography } from '@mui/material';
-import CustomStave from '../Components/CustomStave';
+import Score from '../Components/Score';
 
 export default function MusicSelect() {
   const staveNotes = [
@@ -10,14 +10,10 @@ export default function MusicSelect() {
   ];
   return (
     <Grid container spacing={3}>
-      <Grid item xs={12}>
-        <Typography variant='h5' sx={{ textAlign: 'center' }}>
-          Sheet Name here
-        </Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <CustomStave notes={staveNotes}></CustomStave>
-      </Grid>
+      <Typography variant='h5' sx={{ textAlign: 'center' }}>
+        Sheet Name here
+      </Typography>
+      <Score notes={staveNotes}></Score>
     </Grid>
   );
 }

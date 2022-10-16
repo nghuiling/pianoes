@@ -44,16 +44,18 @@ const ResponsiveAppBar = () => {
           </Box>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size='large'
-              aria-label='account of current user'
-              aria-controls='menu-appbar'
-              aria-haspopup='true'
-              onClick={handleOpenNavMenu}
-              color='inherit'
-            >
-              <MenuIcon />
-            </IconButton>
+            {pages.length > 0 && (
+              <IconButton
+                size='large'
+                aria-label='account of current user'
+                aria-controls='menu-appbar'
+                aria-haspopup='true'
+                onClick={handleOpenNavMenu}
+                color='inherit'
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
             <Menu
               id='menu-appbar'
               anchorEl={anchorElNav}
@@ -80,13 +82,13 @@ const ResponsiveAppBar = () => {
             </Menu>
           </Box>
           <Box sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }}>
-            <Link to='/'>
+            <Link to='/' style={{ display: 'flex' }}>
               <img
                 src={Logo}
                 alt='Pianoes'
                 className='nav--logo'
                 style={{
-                  width: '55px',
+                  width: '45px',
                 }}
               />
             </Link>
@@ -119,12 +121,6 @@ const ResponsiveAppBar = () => {
                 {page}
               </Button>
             ))}
-          </Box>
-
-          <Box sx={{ flexGrow: 0 }}>
-            <IconButton sx={{ p: 0 }}>
-              <Avatar alt='Remy Sharp' src='/' />
-            </IconButton>
           </Box>
         </Toolbar>
       </Container>

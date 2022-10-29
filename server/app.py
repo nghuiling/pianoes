@@ -21,7 +21,7 @@ def test_api():
 @app.route('/api/music', methods=['GET'])
 def view_music_api():
 
-    f = open('./midi_files/midi_files.json')
+    f = open('./data/midi_files.json')
     response = json.load(f)
     response = jsonify(response)
     f.close()
@@ -39,7 +39,7 @@ def select_music_api():
     # params['music_id'] = "1"
     if params['music_id']:
 
-        f = open('./midi_files/midi_files.json')
+        f = open('./data/midi_files.json')
         response = json.load(f)
         response = response['data'][int(params['music_id'])]
         response = jsonify(response)

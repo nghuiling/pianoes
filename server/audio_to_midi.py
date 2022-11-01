@@ -18,8 +18,11 @@ def transcribe(source_audio_path, out_midi_path):
     # Load audio
     audio, _ = load_audio(source_audio_path, sr=sample_rate, mono=True)
 
-    # Transcriptor
-    transcriptor = PianoTranscription(device='cuda', checkpoint_path=None)
+    # Transcriptor:load pre-trained model from path checkpoint
+    #script_dir = os.path.dirname(sys.argv[0])
+    #checkpoint = os.path.abspath(os.path.join(script_dir, 'piano_transcription_inference_data', 'CRNN_note_F1=0.9677_pedal_F1=0.9186.pth'))
+    
+    transcriptor = PianoTranscription(device='cuda', checkpoint_path=checkpoint)
 
     # Transcribe and write out to MIDI file
     transcriptor.transcribe(audio, out_midi_path)

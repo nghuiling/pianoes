@@ -6,6 +6,9 @@ import mido
 import numpy as np
 import pandas as pd
 import scipy
+import muspy
+from piano_transcription_inference import PianoTranscription, sample_rate, load_audio
+import torch
 
 
 class Audio:
@@ -354,29 +357,153 @@ class Evaluate:
             notes_total += notes
 
         return notes_hit_total, notes_miss_total, notes_total
-        
-        
-if __name__ == '__main__':
-    # Sample Usage
- 
-    # Dynamic Time Warping
-    FILENAME_AUDIO_QUERY = 'TestSlow.m4a'
-    FILENAME_AUDIO_REFERENCE = 'TestReference.wav'
-    FILENAME_MIDI_QUERY = 'TestSlow.mid'
-    FILENAME_MIDI_EXPORT = 'TestExportMissingNotes.mid'
-    FILENAME_MIDI_REFERENCE = 'TestReference.mid'
+
+
+
+################ start of audio/midi convertion functions ################
+#convert midi to audio
+def convert_midi2audio(input_path,output_path,ref_num):
+    '''
+    input_path: directory of input midi path (e.g. 'data/midi_files/')
+    output_path: directory of output audio path (e.g. 'data/audio_files/')
+    ref_num: file name or reference number in string (e.g.'0'/'1'/'2'/'3'/'4'/'5'/'6'/'7'/'8'/'9');
+            name must be same as midi file name
+    '''
+
+    #get soundfont to convert midi2audio (first time new download will take a while)
+    muspy.download_musescore_soundfont()
+
+    input_path = input_path + ref_num + '.mid'
+    # music = muspy.read_abc(input_path +'ref1.abc')
+    music = muspy.inputs.read_midi(input_path)
+    output_path = output_path + ref_num + '.m4a'
+    audio = muspy.outputs.write(output_path, music, kind='audio')
+
+    return audio
+
+#convert audio to midi (using bytedance model)
+def convert_audio2midi(input_path,output_path,model_path,ref_num):
+    '''
+    input_path: directory of input audio path (e.g. 'data_query_test/')
+    output_path: directory of output midi path (e.g. 'data_query_test/')
+    model_path: directory of model
+    ref_num: file name or reference number in string (e.g.'0'/'1'/'2'/'3'/'4'/'5'/'6'/'7'/'8'/'9');
+            name must be same as midi file name
+    '''
+    input_path = input_path + ref_num + '.m4a'
+    output_path = output_path + ref_num + '.mid'
+
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    # Load audio
+    audio, _ = load_audio(input_path, sr=sample_rate, mono=True)
+
+    # Transcriptor
+    transcriptor = PianoTranscription(device=device, checkpoint_path=model_path)
+
+    # Transcribe and write out to MIDI file
+    transcriptor.transcribe(audio, output_path)
+################ end of audio/midi convertion functions ################
+
+
+
+def get_evaluation(ref_filename,query_filename='query',test=False):
+    '''
+    ref_filename: file name of reference in string (e.g.'0'/'1'/'2'/'3'/'4'/'5'/'6'/'7'/'8'/'9')
+    query_filename: file name of query in string (e.g. 'query')
+    test: True or False. True if testing for query in data_query_test. False for actual query.
+    '''
+
+    #get reference path
+    ref_audio_path = 'data_reference/audio_files/' 
+    ref_midi_path = 'data_reference/midi_files/' 
+
+    #get model path and transcribe query from audio to midi
+    model_path = 'model/CRNN_note_F1=0.9677_pedal_F1=0.9186.pth'
+
+    #get reference files
+    FILENAME_AUDIO_REFERENCE = ref_audio_path  + ref_filename  +'.m4a'
+    FILENAME_MIDI_REFERENCE = ref_midi_path  + ref_filename  +'.mid'
+
+    #only for testing
+    if test:
+        query_filename = query_filename + ref_filename
+
+        #get query test path (for testing)
+        query_audio_path = 'data_query_test/audio_files/'
+        query_midi_path = 'data_query_test/midi_files/'
+    
+    else:
+        query_filename = query_filename
+
+        #get query path
+        query_audio_path = 'data_query/audio_files/'
+        query_midi_path = 'data_query/midi_files/'
+
+    convert_audio2midi(query_audio_path,query_midi_path,model_path,query_filename)
+
+    #get query test files (for testing)
+    FILENAME_AUDIO_QUERY = query_audio_path + query_filename + '.m4a'
+    FILENAME_MIDI_QUERY = query_midi_path + query_filename + '.mid'
+
 
     audio_query = Audio(FILENAME_AUDIO_QUERY)
     audio_reference = Audio(FILENAME_AUDIO_REFERENCE)
     midi_query = MidiAudio(FILENAME_MIDI_QUERY)
 
     synchronise = Synchronise(audio_query, audio_reference, midi_query)
-    synchronise.plot()
 
     new_midi_query = synchronise.map_midi_audio()
-    new_midi_query.export(FILENAME_MIDI_EXPORT)
-
-    # Evaluation
     midi_reference = MidiAudio(FILENAME_MIDI_REFERENCE)
     evaluator = Evaluate(midi_reference=midi_reference, midi_query=new_midi_query)
     notes_hit, notes_miss, notes_total = evaluator.run()
+
+    return notes_hit, notes_miss, notes_total
+     
+
+################start of to test and run docker for BE only################
+# 1. cd into server
+# 2. run in terminal: docker build -t be .
+
+# 3. uncomment the following:
+
+# #parameters from FE 
+# ref_filename = str(0)
+
+# #query filename will be the same and always overwrited for the same reference piece, located at 'data_query/' 
+# #if got time, we can even have a history to see results
+# query_filename = 'query'
+#notes_hit, notes_miss, notes_total = get_evaluation(ref_filename,query_filename, test=True)
+
+# 4. run in terminal: docker run -it --rm -v ${pwd}:/app be python evaluation.py
+
+################end of to test and run docker for BE only################
+
+
+
+
+
+# if __name__ == '__main__':
+#     # Sample Usage
+ 
+#     # Dynamic Time Warping
+#     FILENAME_AUDIO_QUERY = 'TestSlow.m4a'
+#     FILENAME_AUDIO_REFERENCE = 'TestReference.wav'
+#     FILENAME_MIDI_QUERY = 'TestSlow.mid'
+#     FILENAME_MIDI_EXPORT = 'TestExportMissingNotes.mid'
+#     FILENAME_MIDI_REFERENCE = 'TestReference.mid'
+
+#     audio_query = Audio(FILENAME_AUDIO_QUERY)
+#     audio_reference = Audio(FILENAME_AUDIO_REFERENCE)
+#     midi_query = MidiAudio(FILENAME_MIDI_QUERY)
+
+#     synchronise = Synchronise(audio_query, audio_reference, midi_query)
+#     synchronise.plot()
+
+#     new_midi_query = synchronise.map_midi_audio()
+#     new_midi_query.export(FILENAME_MIDI_EXPORT)
+
+#     # Evaluation
+#     midi_reference = MidiAudio(FILENAME_MIDI_REFERENCE)
+#     evaluator = Evaluate(midi_reference=midi_reference, midi_query=new_midi_query)
+#     notes_hit, notes_miss, notes_total = evaluator.run()

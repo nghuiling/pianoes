@@ -426,7 +426,7 @@ def get_evaluation(ref_filename,query_filename='query',test=False):
     FILENAME_MIDI_REFERENCE = ref_midi_path  + ref_filename  +'.mid'
 
     #only for testing
-    if test:
+    if test==True:
         query_filename = query_filename + ref_filename
 
         #get query test path (for testing)

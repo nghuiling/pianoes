@@ -2,6 +2,11 @@
 
 CS5647 Project: A piano evaluation system for learning
 
+# Download and add model file into pianoes/server/model/
+
+1. Download the model from: https://zenodo.org/record/4034264#.Y2FBBmlBw2x
+2. Add the model file into pianoes/server/model/
+
 # To run both server and client using Docker
 
 1. In the 'pianoes' folder, run `docker-compose up`

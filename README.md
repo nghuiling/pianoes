@@ -2,6 +2,11 @@
 
 CS5647 Project: A piano evaluation system for learning
 
+# Add model file
+
+1. Download the model from: https://zenodo.org/record/4034264#.Y2FBBmlBw2x
+2. Add the model file into pianoes/server/model/
+
 # To run both server and client using Docker
 
 1. In the 'pianoes' folder, run `docker-compose up`
@@ -13,5 +18,5 @@ CS5647 Project: A piano evaluation system for learning
 1. git pull (to get latest version)
 2. git add . ( if you create a new file )
 3. git commit -m "type a description"
-4. git checkout -b "branch name" 
+4. git checkout -b "branch name"
 5. gh pr create ( to create pull request )

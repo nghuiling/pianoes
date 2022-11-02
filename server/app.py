@@ -1,6 +1,11 @@
 from flask import (Flask,jsonify,Response,send_from_directory,request)
+from werkzeug.utils import secure_filename
 import json
 import os
+from evaluation import *
+from scipy.io.wavfile import read, write
+import time
+
 
 app = Flask(__name__)
 
@@ -21,7 +26,7 @@ def test_api():
 @app.route('/api/music', methods=['GET'])
 def view_music_api():
 
-    f = open('./midi_files/midi_files.json')
+    f = open('./data_reference/midi_files.json')
     response = json.load(f)
     response = jsonify(response)
     f.close()
@@ -39,7 +44,7 @@ def select_music_api():
     # params['music_id'] = "1"
     if params['music_id']:
 
-        f = open('./midi_files/midi_files.json')
+        f = open('./data_reference/midi_files.json')
         response = json.load(f)
         response = response['data'][int(params['music_id'])]
         response = jsonify(response)
@@ -48,6 +53,36 @@ def select_music_api():
 
         return response
 
+#get recorded audio
+@app.route('/api/record_audio', methods=['GET', 'POST'])
+def get_score():
+
+    start_time = time.time()
+
+    params = request.args.to_dict()
+
+    if request.method == 'POST':
+
+        if params['music_id']:
+            
+            #note the input must be in m4a
+            f = request.files['query_audio_file']
+            # file_name = secure_filename(f.filename)
+            file_path = "./data_query/audio_files/"+'query.m4a'
+            f.save(file_path)
+
+            #params
+            ref_filename = params['music_id']
+            query_filename = 'query'
+
+            #run the evaluation model
+            notes_hit, notes_miss, notes_total = get_evaluation(ref_filename,query_filename)
+            #time in seconds
+            duration = time.time() - start_time
+            response = jsonify({'notes_hit':notes_hit,'notes_miss':notes_miss,'notes_total':notes_total,'time_taken':duration})
+            response.status = 200
+
+            return response
 
 
 if __name__ == '__main__':

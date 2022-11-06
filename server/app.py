@@ -31,7 +31,8 @@ def view_music_api():
     response = jsonify(response)
     f.close()
     response.status = 200
-
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
 
 
@@ -43,14 +44,12 @@ def select_music_api():
     #MUST change the params else will not work
     # params['music_id'] = "1"
     if params['music_id']:
-
-        f = open('./data_reference/midi_files.json')
-        response = json.load(f)
-        response = response['data'][int(params['music_id'])]
-        response = jsonify(response)
-        f.close()
+        with open(f'./data_reference/abcjs_files/{params["music_id"]}.abc') as f:
+            abc_payload = f.read().strip()
+        response = jsonify({"data": abc_payload})
         response.status = 200
-
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
         return response
 
 #get recorded audio

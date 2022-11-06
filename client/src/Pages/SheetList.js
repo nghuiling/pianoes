@@ -9,54 +9,10 @@ import imgMountain from '../images/pic_mountain.png';
 import imgWater from '../images/pic_water.png';
 
 const images = [imgAmazon, imgMountain, imgWater];
-const sampleData = [
-  {
-    id: 1,
-    title: 'Spirit Duet',
-    file: 'spirit_duet.mid',
-    imgSrc: imgAmazon,
-  },
-  {
-    id: 2,
-    title: 'To Zanarkand',
-    file: 'to_zanarkand.mid',
-    imgSrc: imgMountain,
-  },
-  {
-    id: 3,
-    title: 'Croation Rhapsody',
-    file: 'croation_rhapsody.mid',
-    imgSrc: imgWater,
-  },
-  {
-    id: 4,
-    title: 'The Entertainer',
-    file: 'the_entertainer.mid',
-    imgSrc: imgAmazon,
-  },
-  {
-    id: 5,
-    title: 'Waltz of Chihiro',
-    file: 'waltz_of_chihiro.mid',
-    imgSrc: imgMountain,
-  },
-  {
-    id: 6,
-    title: 'Kiss the Rain',
-    file: 'kiss_the_rain.mid',
-    imgSrc: imgWater,
-  },
-  {
-    id: 7,
-    title: 'Moonlight Sonata No. 14',
-    file: 'moonlight_sonata_no_14.mid',
-    imgSrc: imgAmazon,
-  },
-];
 
 const SlideCard = (song) => {
   return (
-    <Link to='/sheet/id' key={song.id}>
+    <Link to={`/sheet/${song.music_id}`} key={song.music_id}>
       <Box
         sx={{
           position: 'relative',
@@ -70,7 +26,7 @@ const SlideCard = (song) => {
         }}
       >
         <img
-          src={song.imgSrc}
+          src={images[song.music_id % images.length]}
           alt='sample'
           className='btn-logo'
           style={{
@@ -95,7 +51,7 @@ const SlideCard = (song) => {
               p: 0,
             }}
           >
-            {song.title}
+            {song.music_title}
           </Typography>
         </Box>
       </Box>
@@ -107,11 +63,11 @@ export default function MusicSelect() {
   const [pieces, setPieces] = useState([]);
 
   useEffect(() => {
-    get('path/to/get/music')
+    get('/api/music')
       .then((data) => {
         setPieces(data.map(SlideCard));
       })
-      .catch(setPieces(sampleData.map(SlideCard)));
+      .catch(console.log('sheet load error'));
   }, []);
 
   return (

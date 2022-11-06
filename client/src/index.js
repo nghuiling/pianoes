@@ -12,7 +12,7 @@ root.render(
     <Routes>
       <Route path='/' element={<App />}>
         <Route path='/' element={<SheetList />} />
-        <Route path='/sheet/id' element={<SheetView />} />
+        <Route path='/sheet/:id' element={<SheetView />} />
       </Route>
     </Routes>
   </BrowserRouter>

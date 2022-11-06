@@ -1,19 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button, Stack } from '@mui/material';
 import { Notation, Midi } from 'react-abc';
-
-const notation = `X:1
-T: Hot Cross Bun
-M: 4/4
-L: 1/4
-Q:1/4=120
-K:C
-E D C z1|E D C z1|C C D D|E D C z1|`;
+import { useParams } from 'react-router-dom';
+import { get } from '../Adapters/base';
 
 export default function MusicSelect() {
+  const [notation, setNotation] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [webMediaRecorder, setWebMediaRecorder] = useState(null);
   const audioClips = useRef();
+  const { id } = useParams();
+
+  useEffect(() => {
+    get('/api/music/select', { music_id: id })
+      .then((data) => {
+        setNotation(data);
+      })
+      .catch(console.log('error loading selected sheet music'));
+  }, [id, notation]);
 
   useEffect(() => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -92,9 +96,8 @@ export default function MusicSelect() {
 
   return (
     <Stack spacing={2}>
-      {/* <Score notes={staveNotes}></Score> */}
       <Notation notation={notation} />
-      <Midi notation={notation} />
+      {notation && <Midi notation={notation} />}
       <Button onClick={toggleRecord}>{isRecording ? 'Stop' : 'Record'}</Button>
       <Stack spacing={0} ref={audioClips}></Stack>
     </Stack>

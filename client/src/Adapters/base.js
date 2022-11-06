@@ -1,13 +1,16 @@
 const base_url = process.env.REACT_APP_API_URI;
 
-export function get(path) {
+export function get(path, payload) {
   path = path || '';
-  return fetch(base_url + path, { method: 'GET' })
+  payload = payload ? '?' + new URLSearchParams(payload) : '';
+  return fetch(base_url + path + payload, {
+    method: 'GET',
+    'Content-Type': 'application/json',
+  })
     .then((response) => {
-      if (response.status === 200) {
-        return response.json();
-      }
-      throw new Error('Something went wrong');
+      return response.json().then((data) => {
+        return data.data;
+      });
     })
     .catch((error) => {
       // create toast then throw error { status: 400 };

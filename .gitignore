@@ -23,6 +23,7 @@ yarn-debug.log*
 yarn-error.log*
 
 .vscode
+__pycache__
 
 #model
 /server/model/CRNN_note_F1=0.9677_pedal_F1=0.9186.pth

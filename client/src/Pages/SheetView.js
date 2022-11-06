@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button, Stack } from '@mui/material';
 import { Notation, Midi } from 'react-abc';
 import { useParams } from 'react-router-dom';
-import { get } from '../Adapters/base';
+import { get, postFile } from '../Adapters/base';
 
 export default function MusicSelect() {
   const [notation, setNotation] = useState('');
@@ -57,12 +57,14 @@ export default function MusicSelect() {
             clipContainer.appendChild(audio);
             clipContainer.appendChild(clipLabel);
             clipContainer.appendChild(deleteButton);
-            console.log(audioClips.current.children.length);
             audioClips.current.appendChild(clipContainer);
 
             const blob = new Blob(chunks, { type: 'audio/webm; codecs=vp9' });
             chunks.splice(0);
             const audioURL = window.URL.createObjectURL(blob);
+            postFile('/api/record_audio', blob).then((res) => {
+              console.log(res);
+            });
             audio.src = audioURL;
 
             deleteButton.onclick = (e) => {

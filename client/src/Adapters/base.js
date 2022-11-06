@@ -5,7 +5,26 @@ export function get(path, payload) {
   payload = payload ? '?' + new URLSearchParams(payload) : '';
   return fetch(base_url + path + payload, {
     method: 'GET',
-    'Content-Type': 'application/json',
+  })
+    .then((response) => {
+      return response.json().then((data) => {
+        return data.data;
+      });
+    })
+    .catch((error) => {
+      // create toast then throw error { status: 400 };
+      throw new Error(error);
+    });
+}
+
+export function postFile(path, blob) {
+  const form = new FormData();
+  form.append('file', blob, 'query_audio_file');
+  form.append('music_id', '1');
+  console.log(form);
+  return fetch(base_url + path, {
+    method: 'POST',
+    body: form,
   })
     .then((response) => {
       return response.json().then((data) => {

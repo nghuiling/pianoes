@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, Stack } from '@mui/material';
+import { IconButton, Stack } from '@mui/material';
 import { Notation, Midi } from 'react-abc';
 import { useParams } from 'react-router-dom';
 import { get, postFile } from '../Adapters/base';
+import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
+import StopIcon from '@mui/icons-material/Stop';
 
 export default function MusicSelect() {
   const [notation, setNotation] = useState('');
@@ -41,7 +43,14 @@ export default function MusicSelect() {
           };
           mediaRecorder.onstop = (e) => {
             console.log('recorder stopped');
+            const blob = new Blob(chunks, { type: 'audio/webm; codecs=vp9' });
+            chunks.splice(0);
+            postFile('/api/record_audio', blob).then((res) => {
+              // TODO: handle the response and display results
+              console.log(res);
+            });
 
+            // TODO: REMOVE everything below once ready for production, this is only for sanity check (listen to audio)
             const clipName = `clip-${audioClips.current.children.length}`;
 
             const clipContainer = document.createElement('article');
@@ -58,19 +67,14 @@ export default function MusicSelect() {
             clipContainer.appendChild(clipLabel);
             clipContainer.appendChild(deleteButton);
             audioClips.current.appendChild(clipContainer);
-
-            const blob = new Blob(chunks, { type: 'audio/webm; codecs=vp9' });
-            chunks.splice(0);
             const audioURL = window.URL.createObjectURL(blob);
-            postFile('/api/record_audio', blob).then((res) => {
-              console.log(res);
-            });
             audio.src = audioURL;
 
             deleteButton.onclick = (e) => {
               let evtTgt = e.target;
               evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode);
             };
+            // END OF REMOVE
           };
         })
         .catch((err) => {
@@ -83,24 +87,17 @@ export default function MusicSelect() {
   }, []);
 
   const toggleRecord = (ev) => {
-    if (isRecording) {
-      setIsRecording(false);
-      webMediaRecorder.stop();
-      console.log(webMediaRecorder.state);
-      console.log('recorder stopped');
-    } else {
-      setIsRecording(true);
-      console.log(webMediaRecorder.state);
-      console.log('recorder started');
-      webMediaRecorder.start();
-    }
+    isRecording ? webMediaRecorder.stop() : webMediaRecorder.start();
+    setIsRecording(!isRecording);
   };
 
   return (
-    <Stack spacing={2}>
+    <Stack style={{ margin: 'auto' }} spacing={2}>
       <Notation notation={notation} />
       {notation && <Midi notation={notation} />}
-      <Button onClick={toggleRecord}>{isRecording ? 'Stop' : 'Record'}</Button>
+      <IconButton color='error' aria-label='record' onClick={toggleRecord}>
+        {isRecording ? <StopIcon /> : <KeyboardVoiceIcon />}
+      </IconButton>
       <Stack spacing={0} ref={audioClips}></Stack>
     </Stack>
   );

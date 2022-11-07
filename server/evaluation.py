@@ -347,16 +347,40 @@ class Evaluate:
         midi_notes_query = self.midi_query.get_notes_onsets()
 
         notes_hit_total, notes_miss_total, notes_total = 0, 0, 0
+        all_reference_notes_hit = {i: [] for i in midi_notes_reference}
+
         for note in midi_notes_reference:
             occurrences_reference = midi_notes_reference[note]
             occurrences_query = midi_notes_query[note]
-            notes_hit, notes_miss, notes = self.compare_note_hits(occurrences_reference, occurrences_query)
+            number_notes_hit, number_notes_miss, number_notes, reference_notes_hit \
+                = self.compare_note_hits(occurrences_reference, occurrences_query)
 
-            notes_hit_total += notes_hit
-            notes_miss_total += notes_miss
-            notes_total += notes
+            notes_hit_total += number_notes_hit
+            notes_miss_total += number_notes_miss
+            notes_total += number_notes
+            all_reference_notes_hit[note] = reference_notes_hit
 
+        self.all_reference_notes_hit = all_reference_notes_hit
         return notes_hit_total, notes_miss_total, notes_total
+    
+    def get_notes_hit_sequence(self) -> list[bool]:
+        all_reference_notes_hit = self.all_reference_notes_hit
+        midi_notes_reference = self.midi_reference.get_notes_onsets()
+
+        # Compile all notes into sequence of messages
+        messages, notes_hit = [], []
+        ticks_per_beat, tempo = self.midi_reference.ticks_per_beat, self.midi_reference.tempo
+        for note, occurrences in midi_notes_reference.items():
+            reference_notes_hit = all_reference_notes_hit[note]
+            for occurrence, is_note_hit in zip(occurrences, reference_notes_hit):
+                time, velocity = occurrence
+                time = mido.second2tick(time, ticks_per_beat, tempo)  # Change to ticks
+                messages.append((note, time, velocity))
+                notes_hit.append(is_note_hit)
+
+        # Sort by message time, i.e. x[0][0]
+        messages, notes_hit = zip(*sorted(zip(messages, notes_hit), key=lambda x: x[0][0]))
+        return notes_hit
 
 
 
@@ -507,3 +531,4 @@ def get_evaluation(ref_filename,query_filename='query',test=False):
 #     midi_reference = MidiAudio(FILENAME_MIDI_REFERENCE)
 #     evaluator = Evaluate(midi_reference=midi_reference, midi_query=new_midi_query)
 #     notes_hit, notes_miss, notes_total = evaluator.run()
+#     notes_hit_sequence = evaluator.get_notes_hit_sequence()

@@ -84,10 +84,16 @@ def get_score():
             query_filename = 'query'
 
             #run the evaluation model
-            notes_hit, notes_miss, notes_total = get_evaluation(ref_filename,query_filename)
+            notes_hit, notes_miss, notes_total, notes_hit_sequence = get_evaluation(ref_filename,query_filename)
             #time in seconds
             duration = time.time() - start_time
-            response = jsonify({'data': {'notes_hit':notes_hit,'notes_miss':notes_miss,'notes_total':notes_total,'time_taken':duration}})
+            response = jsonify({'data': {
+                'notes_hit':notes_hit,
+                'notes_miss':notes_miss,
+                'notes_total':notes_total,
+                'time_taken':duration,
+                'notes_hit_sequence':notes_hit_sequence
+            }})
             response.status = 200
             response.headers.add('Access-Control-Allow-Origin', '*')
             response.headers.add('Access-Control-Allow-Credentials', 'true')

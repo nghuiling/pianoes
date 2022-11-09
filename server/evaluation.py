@@ -294,18 +294,20 @@ class Evaluate:
         Compares list of 1 note
         :param occurrences_reference: list containing occurrences of one note
         :param occurrences_query:
-        :return: (notes_hit, notes_misse, total_notes)
+        :return: (number_notes_hit, number_notes_miss, number_total_notes)
         """
         # If notes are empty for either, return 0
         if len(occurrences_reference) == 0 or len(occurrences_query) == 0:
-            return 0, 0, 0
+            return 0, 0, 0, []
 
         threshold = self.threshold
         window_size = self.window_size
 
         # print("OCCURRENCES", occurrences_reference, occurrences_query)
         i, j = 0, 0
-        notes_hit, notes_miss = 0, 0
+
+        number_notes_hit, number_notes_miss = 0, 0
+        reference_notes_hit = [False for _ in occurrences_reference]
         while i < len(occurrences_reference) and j < len(occurrences_query):
 
             # Get current note reference
@@ -323,20 +325,20 @@ class Evaluate:
                 #  Within threshold
                 if -threshold <= note_reference_time - note_query_time <= threshold:
                     note_hit = True
+                    reference_notes_hit[i] = True
                     i += 1
                     j = j + k + 1  # Move j to query note after the one that matches
                     break
 
             if note_hit is True:
-                notes_hit += 1
+                number_notes_hit += 1
             else:
-                notes_miss += 1
+                number_notes_miss += 1
                 i += 1
 
         # Account for all reference notes that weren't checked when query notes ran out
-        notes_miss += len(occurrences_reference[i:])
-
-        return notes_hit, notes_miss, len(occurrences_reference)
+        number_notes_miss += len(occurrences_reference[i:])
+        return number_notes_hit, number_notes_miss, len(occurrences_reference), reference_notes_hit
 
     def run(self):
         """

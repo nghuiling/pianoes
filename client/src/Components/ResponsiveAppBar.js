@@ -10,6 +10,7 @@ import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import Logo from '../images/logo_black.png';
+import LogoBack from '../images/back_button.png';
 import { Link } from 'react-router-dom';
 
 const pages = [];
@@ -29,18 +30,34 @@ const ResponsiveAppBar = () => {
     <AppBar position='static' sx={{ backgroundColor: '#000' }}>
       <Container maxWidth='xl'>
         <Toolbar disableGutters>
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }}>
+
+          <Box sx={{ display: { xs: 'none', md: 'flex' },  padding: 1 }}>
             <Link to='/'>
               <img
                 src={Logo}
-                alt='Pianoes'
+                alt='PIANOES'
                 className='btn-logo'
                 style={{
-                  width: '55px',
+                  width: '80px',
                 }}
               />
-            </Link>
+            </Link>            
           </Box>
+
+
+          <Box sx={{ display: { xs: 'none', md: 'flex' },  padding: 1}}>
+            <Link to='/'>
+              <img
+                src={LogoBack}
+                alt='BACK'
+                className='btn-logo'
+                style={{
+                  width: '80px',
+                }}
+              />
+            </Link>            
+          </Box>
+
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             {pages.length > 0 && (
@@ -84,10 +101,10 @@ const ResponsiveAppBar = () => {
             <Link to='/' style={{ display: 'flex' }}>
               <img
                 src={Logo}
-                alt='Pianoes'
+                alt='PIANOES'
                 className='nav--logo'
                 style={{
-                  width: '45px',
+                  width: '50px',
                 }}
               />
             </Link>
@@ -101,14 +118,14 @@ const ResponsiveAppBar = () => {
               mr: 2,
               display: { xs: 'flex', md: 'none' },
               flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
+              fontFamily: 'Tw Cen MT',
+              fontWeight: 200,
               letterSpacing: '.3rem',
               color: 'inherit',
               textDecoration: 'none',
             }}
           >
-            Pianoes
+            PIANOES
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) => (

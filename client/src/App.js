@@ -4,6 +4,8 @@ import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
 import { Outlet } from 'react-router-dom';
 
+import Navbar from './Components/Navbar';
+
 // import { Test } from './Components/Test';
 // import { get } from './Adapters/base';
 
@@ -26,13 +28,13 @@ function App() {
         </header>
       </div> */}
       {/* testing end */}
-      <Stack
+      {/* <Stack
         direction='column'
         justifyContent='center'
         alignItems='center'
         sx={{ height: '100vh' }}
-      >
-        <ResponsiveAppBar />
+      > */}
+        <Navbar/>
         <Container
           className='fancy-bg'
           maxWidth='lg'
@@ -45,7 +47,7 @@ function App() {
         >
           <Outlet />
         </Container>
-      </Stack>
+      {/* </Stack> */}
     </>
   );
 }

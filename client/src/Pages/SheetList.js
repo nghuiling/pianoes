@@ -4,11 +4,23 @@ import Carousel from '../Components/Carousel';
 import { get } from '../Adapters/base';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import imgAmazon from '../images/pic_amazon.png';
-import imgMountain from '../images/pic_mountain.png';
-import imgWater from '../images/pic_water.png';
+import pic0 from '../images/0.jpg';
+import pic1 from '../images/1.jpg';
+import pic2 from '../images/2.jpg';
+import pic3 from '../images/3.jpg';
+import pic4 from '../images/4.jpg';
+import pic5 from '../images/5.jpg';
+import pic6 from '../images/6.jpg';
+import pic7 from '../images/7.jpg';
+import pic8 from '../images/8.jpg';
+import pic9 from '../images/9.jpg';
 
-const images = [imgAmazon, imgMountain, imgWater];
+
+import Hero from '../Components/Hero';
+
+import Card from '../Components/Card';
+
+const images = [pic0,pic1,pic2,pic3,pic4,pic5,pic6,pic7,pic8,pic9];
 
 const SlideCard = (song) => {
   return (
@@ -73,9 +85,7 @@ export default function MusicSelect() {
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
-        <Typography variant='h5' sx={{ textAlign: 'center' }}>
-          Select a sheet music to play
-        </Typography>
+        <Hero />
       </Grid>
       <Grid item xs={12}>
         <Carousel items={pieces} />

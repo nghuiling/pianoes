@@ -483,8 +483,9 @@ def get_evaluation(ref_filename,query_filename='query',test=False):
     midi_reference = MidiAudio(FILENAME_MIDI_REFERENCE)
     evaluator = Evaluate(midi_reference=midi_reference, midi_query=new_midi_query)
     notes_hit, notes_miss, notes_total = evaluator.run()
+    notes_hit_sequence = evaluator.get_notes_hit_sequence()
 
-    return notes_hit, notes_miss, notes_total
+    return notes_hit, notes_miss, notes_total, notes_hit_sequence
      
 
 ################start of to test and run docker for BE only################

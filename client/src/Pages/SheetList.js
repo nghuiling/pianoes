@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { Box, Grid, Typography } from '@mui/material';
-import Carousel from '../Components/Carousel';
+import { Card, CardContent, CardMedia, Grid, Typography } from '@mui/material';
 import { get } from '../Adapters/base';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -15,61 +14,11 @@ import pic7 from '../images/7.jpg';
 import pic8 from '../images/8.jpg';
 import pic9 from '../images/9.jpg';
 
-
 import Hero from '../Components/Hero';
 
-import Card from '../Components/Card';
+// import Card from '../Components/Card';
 
-const images = [pic0,pic1,pic2,pic3,pic4,pic5,pic6,pic7,pic8,pic9];
-
-const SlideCard = (song) => {
-  return (
-    <Link to={`/sheet/${song.music_id}`} key={song.music_id}>
-      <Box
-        sx={{
-          position: 'relative',
-          height: '100%',
-          width: '100%',
-          margin: 'auto',
-          display: 'flex',
-          '&:hover': {
-            transform: 'scale(110%)',
-          },
-        }}
-      >
-        <img
-          src={images[song.music_id % images.length]}
-          alt='sample'
-          className='btn-logo'
-          style={{
-            width: '100%',
-            height: '100%',
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            height: '100%',
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyItems: 'center',
-          }}
-        >
-          <Typography
-            sx={{
-              width: '100%',
-              backgroundColor: 'rgba(255, 255, 255, 0.7)',
-              p: 0,
-            }}
-          >
-            {song.music_title}
-          </Typography>
-        </Box>
-      </Box>
-    </Link>
-  );
-};
+const images = [pic0, pic1, pic2, pic3, pic4, pic5, pic6, pic7, pic8, pic9];
 
 export default function MusicSelect() {
   const [pieces, setPieces] = useState([]);
@@ -77,7 +26,8 @@ export default function MusicSelect() {
   useEffect(() => {
     get('/api/music')
       .then((data) => {
-        setPieces(data.map(SlideCard));
+        console.log(data);
+        setPieces(data);
       })
       .catch(console.log('sheet load error'));
   }, []);
@@ -88,7 +38,51 @@ export default function MusicSelect() {
         <Hero />
       </Grid>
       <Grid item xs={12}>
-        <Carousel items={pieces} />
+        <Grid container spacing={2}>
+          {pieces.map((song) => {
+            return (
+              <Grid item xs={12} sm={12 / 2} md={12 / 3} lg={12 / 5}>
+                <Link to={`/sheet/${song.music_id}`} key={song.music_id}>
+                  <Card
+                    sx={{
+                      border: 8,
+                      borderColor: 'white',
+                      position: 'relative',
+                    }}
+                  >
+                    <CardMedia
+                      component='img'
+                      alt={song.music_title}
+                      height='250'
+                      image={images[song.music_id % images.length]}
+                    />
+                    <CardContent
+                      sx={{
+                        position: 'absolute',
+                        bottom: 0,
+                        margin: 'auto',
+                        width: '100%',
+                        padding: '0!important',
+                      }}
+                    >
+                      <Typography
+                        variant='h5'
+                        component='div'
+                        sx={{
+                          textAlign: 'center',
+                          backgroundColor: '#ffffffcc',
+                          p: 1,
+                        }}
+                      >
+                        {song.music_title}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </Grid>
+            );
+          })}
+        </Grid>
       </Grid>
     </Grid>
   );

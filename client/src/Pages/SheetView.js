@@ -18,16 +18,16 @@ export default function MusicSelect() {
       .then((data) => {
         setNotation(data);
       })
-      .catch(console.log('error loading selected sheet music'));
+      .catch((err) => {
+        console.log(`error loading selected sheet music: ${err}`);
+      });
   }, [id, notation]);
 
-  useEffect(() => {
+  const initializeMedia = () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      console.log('getUserMedia supported.');
       navigator.mediaDevices
         .getUserMedia({
-          // constraints - only audio needed for this app
-          audio: true,
+          audio: true, // only audio needed for this app
         })
         .then((stream) => {
           // Success callback
@@ -38,11 +38,9 @@ export default function MusicSelect() {
           mediaRecorder.ondataavailable = (e) => {
             if (e.data.size > 0) {
               chunks.push(e.data);
-              console.log('recording', chunks.length);
             }
           };
           mediaRecorder.onstop = (e) => {
-            console.log('recorder stopped');
             const blob = new Blob(chunks, { type: 'audio/webm; codecs=vp9' });
             chunks.splice(0);
             postFile('/api/record_audio', blob).then((res) => {
@@ -78,26 +76,48 @@ export default function MusicSelect() {
           };
         })
         .catch((err) => {
-          // Error callback
           console.error(`The following getUserMedia error occurred: ${err}`);
+          alert('You need to enable microphone for this feature to work!');
         });
     } else {
       console.log('getUserMedia not supported on your browser!');
     }
+  };
+
+  useEffect(() => {
+    initializeMedia();
   }, []);
 
   const toggleRecord = (ev) => {
-    isRecording ? webMediaRecorder.stop() : webMediaRecorder.start();
-    setIsRecording(!isRecording);
+    if (webMediaRecorder) {
+      isRecording ? webMediaRecorder.stop() : webMediaRecorder.start();
+      setIsRecording(!isRecording);
+    } else {
+      initializeMedia();
+    }
   };
 
   return (
     <Stack style={{ margin: 'auto' }} spacing={2}>
-      <Notation notation={notation} />
-      {notation && <Midi notation={notation} />}
-      <IconButton color='error' aria-label='record' onClick={toggleRecord}>
+      <IconButton
+        color='error'
+        aria-label='record'
+        onClick={toggleRecord}
+        sx={{
+          marginTop: '30px',
+          mx: 'auto',
+          width: '80px',
+          height: '80px',
+          backgroundColor: '#eeeeee',
+          '&:hover': {
+            backgroundColor: '#ffffff',
+          },
+        }}
+      >
         {isRecording ? <StopIcon /> : <KeyboardVoiceIcon />}
       </IconButton>
+      <Notation notation={notation} />
+      {notation && <Midi notation={notation} />}
       <Stack spacing={0} ref={audioClips}></Stack>
     </Stack>
   );

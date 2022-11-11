@@ -1,10 +1,12 @@
-import React from "react"
+import { Box, Typography } from '@mui/material';
+import React from 'react';
 
 export default function Hero() {
-    return (
-        <section>
-            <h1 className="hero">Select a sheet music to play</h1>
-        </section>
-
-    )
+  return (
+    <Box>
+      <Typography variant='h4' sx={{ py: 5, textAlign: 'center' }}>
+        Select a sheet music to play
+      </Typography>
+    </Box>
+  );
 }

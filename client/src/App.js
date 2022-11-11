@@ -1,54 +1,45 @@
 import './App.css';
-import ResponsiveAppBar from './Components/ResponsiveAppBar';
 import Container from '@mui/material/Container';
-import Stack from '@mui/material/Stack';
 import { Outlet } from 'react-router-dom';
 
 import Navbar from './Components/Navbar';
+import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 
-// import { Test } from './Components/Test';
-// import { get } from './Adapters/base';
+const theme = createTheme({
+  typography: {
+    fontFamily: [
+      'Poppins',
+      'Segoe UI',
+      'Roboto',
+      'Oxygen',
+      'Ubuntu',
+      'Cantarell',
+      'Fira Sans',
+      'Droid Sans',
+      'Helvetica Neue',
+      'sans-serif',
+    ].join(','),
+  },
+});
 
 function App() {
-  // // added this for testing
-  // // start of test
-  // const [initialState, setState] = useState([]);
-
-  // useEffect(() => {
-  //   get().then((data) => setState(data));
-  // }, []);
-  // // end of test
-
   return (
-    <>
-      {/* testing start */}
-      {/* <div className='App'>
-        <header>
-          <Test data={initialState} />
-        </header>
-      </div> */}
-      {/* testing end */}
-      {/* <Stack
-        direction='column'
-        justifyContent='center'
-        alignItems='center'
-        sx={{ height: '100vh' }}
-      > */}
-        <Navbar/>
-        <Container
-          className='fancy-bg'
-          maxWidth='lg'
-          sx={{
-            flexGrow: 1,
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          <Outlet />
-        </Container>
-      {/* </Stack> */}
-    </>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Navbar />
+      <Container
+        className='fancy-bg'
+        maxWidth='xl'
+        sx={{
+          flexGrow: 1,
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <Outlet />
+      </Container>
+    </ThemeProvider>
   );
 }
 

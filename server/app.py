@@ -70,8 +70,7 @@ def get_score():
     if request.method == 'POST':
         music_id = request.form.get('music_id', None)
         if music_id is not None:
-            print(music_id)
-            print(request.files)
+            print("music_id", music_id)
             #note the input must be in m4a
             f = request.files['file']
             file_path_webm = "./data_query/audio_files/"+'query.webm'

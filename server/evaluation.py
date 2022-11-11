@@ -501,14 +501,14 @@ def get_evaluation(ref_filename,query_filename='query',test=False):
     '''
 
     #get reference path
-    ref_audio_path = 'data_reference/audio_files/' 
+    # ref_audio_path = 'data_reference/audio_files/' 
     ref_midi_path = 'data_reference/midi_files/' 
 
     #get model path and transcribe query from audio to midi
     model_path = 'model/CRNN_note_F1=0.9677_pedal_F1=0.9186.pth'
 
     #get reference files
-    FILENAME_AUDIO_REFERENCE = ref_audio_path  + ref_filename  +'.m4a'
+    # FILENAME_AUDIO_REFERENCE = ref_audio_path  + ref_filename  +'.m4a'
     FILENAME_MIDI_REFERENCE = ref_midi_path  + ref_filename  +'.mid'
 
     #only for testing
@@ -529,22 +529,19 @@ def get_evaluation(ref_filename,query_filename='query',test=False):
     convert_audio2midi(query_audio_path,query_midi_path,model_path,query_filename)
 
     #get query test files (for testing)
-    FILENAME_AUDIO_QUERY = query_audio_path + query_filename + '.m4a'
+    # FILENAME_AUDIO_QUERY = query_audio_path + query_filename + '.m4a'
     FILENAME_MIDI_QUERY = query_midi_path + query_filename + '.mid'
 
-
-    audio_query = Audio(FILENAME_AUDIO_QUERY)
-    audio_reference = Audio(FILENAME_AUDIO_REFERENCE)
+    # audio_query = Audio(FILENAME_AUDIO_QUERY)
+    # audio_reference = Audio(FILENAME_AUDIO_REFERENCE)
     midi_query = MidiAudio(FILENAME_MIDI_QUERY)
 
-    synchronise = Synchronise(audio_query, audio_reference, midi_query)
-
-    new_midi_query = synchronise.map_midi_audio()
+    # synchronise = Synchronise(audio_query, audio_reference, midi_query)
+    # new_midi_query = synchronise.map_midi_audio()
     midi_reference = MidiAudio(FILENAME_MIDI_REFERENCE)
-    evaluator = Evaluate(midi_reference=midi_reference, midi_query=new_midi_query)
-    notes_hit, notes_miss, notes_total = evaluator.run()
-    notes_hit_sequence = evaluator.get_notes_hit_sequence()
-
+    # evaluator = Evaluate(midi_reference=midi_reference, midi_query=new_midi_query) # old
+    evaluator = Evaluate(midi_reference=midi_reference, midi_query=midi_query)
+    notes_hit, notes_miss, notes_total, notes_hit_sequence = evaluator.run_notes_sequential()
     return notes_hit, notes_miss, notes_total, notes_hit_sequence
      
 

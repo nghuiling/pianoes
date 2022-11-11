@@ -19,7 +19,10 @@ class Audio:
         self.n_fft = 4410
         self.hop_size = 512
 
-        if filepath is not None:
+        if filepath is not None and sampling_rate is not None:
+            self.x, self.sampling_rate = librosa.load(filepath, sr=sampling_rate)
+            self.x, self.x_trimmed_index = librosa.effects.trim(self.x, top_db=20, hop_length=32)
+        elif filepath is not None:
             self.x, self.sampling_rate = librosa.load(filepath)
             self.x, self.x_trimmed_index = librosa.effects.trim(self.x, top_db=20, hop_length=32)
         else:
@@ -37,10 +40,11 @@ class MidiAudio:
     """
     MidiAudio class reads MIDI files (.mid) using Mido library.
     """
-    def __init__(self, filepath=None, notes=None, ticks_per_beat=-1, tempo=-1):
+    def __init__(self, filepath=None, notes=None, notes_sequential=None, ticks_per_beat=-1, tempo=-1):
         self.filepath = filepath
         self.file = None
         self.notes = notes
+        self.notes_sequential = notes_sequential
         self.ticks_per_beat = ticks_per_beat
         self.tempo = tempo
 
@@ -70,10 +74,10 @@ class MidiAudio:
         :return: None
         """
         self.ticks_per_beat, self.tempo = self.parse_stats(file)
-        self.notes = self.parse_notes(file)
+        self.notes, self.notes_sequential = self.parse_notes(file)
 
     @staticmethod
-    def parse_stats(file: mido.MidiFile) -> tuple[int, int]:
+    def parse_stats(file: mido.MidiFile):
         """
         Parses ticks_per_beat and tempo from Midi file
         :param file: mido.MidiFile
@@ -91,7 +95,7 @@ class MidiAudio:
                         tempo = message.tempo
         return ticks_per_beat, tempo
 
-    def parse_notes(self, file: mido.MidiFile) -> dict[list[tuple[float, int]]]:
+    def parse_notes(self, file: mido.MidiFile):
         """
         Parses messages from Midi file into notes dictionary, which maps each Midi note to list of occurrences,
         where occurrence = (time_in_seconds, velocity)
@@ -99,18 +103,22 @@ class MidiAudio:
         :return:
         """
         notes = {i: [] for i in range(128)}
+        notes_sequential = []
 
         for track in file.tracks:  # file = mido.MidiFile object
             current_ticks = 0
             for message in track:  # might have multiple tracks
                 if not message.is_meta:  # Ignore meta messages, which set rhythm and stuff
-                    if message.type == 'note_on':  # Ignore control change as it deals with expressiveness
+                    if message.type in ('note_on', 'note_off'):  # Ignore control change as it deals with expressiveness
                         # Time = time since last message, in MIDI ticks
                         note, velocity, delta_ticks = message.note, message.velocity, message.time
                         current_ticks += delta_ticks
                         current_time = mido.tick2second(current_ticks, self.ticks_per_beat, self.tempo)
                         notes[note].append((current_time, velocity))
-        return notes
+
+                        if velocity != 0 and message.type != 'note_off':
+                            notes_sequential.append(note)
+        return notes, notes_sequential
 
     def plot(self, note_number: int) -> None:
         """
@@ -194,7 +202,7 @@ class Synchronise:
         """
         distance_matrix, warp_path = librosa.sequence.dtw(X=self.audio_query.chroma,
                                                           Y=self.audio_reference.chroma,
-                                                          metric='euclidean')
+                                                          metric='cosine')
 
         warp_path_scaled = np.asarray(warp_path) * self.hop_size / self.sampling_rate
 
@@ -209,6 +217,10 @@ class Synchronise:
 
         mapping_function = scipy.interpolate.interp1d(x, y, fill_value="extrapolate")
 
+        # x = [t for t in range(10)]
+        # y = mapping_function(x)
+        # plt.plot(x, y)
+        # plt.show()
         return mapping_function
 
     def map_midi_audio(self) -> MidiAudio:
@@ -275,7 +287,7 @@ class Synchronise:
 
 
 class Evaluate:
-    def __init__(self, midi_reference: MidiAudio, midi_query: MidiAudio, threshold_ms=500, window_size=3):
+    def __init__(self, midi_reference: MidiAudio, midi_query: MidiAudio, threshold_ms=2000, window_size=2):
         """
 
         :param midi_reference:
@@ -288,6 +300,8 @@ class Evaluate:
 
         self.threshold = threshold_ms / 1000
         self.window_size = window_size
+
+        self.all_reference_notes_hit = None
 
     def compare_note_hits(self, occurrences_reference, occurrences_query):
         """
@@ -364,8 +378,12 @@ class Evaluate:
 
         self.all_reference_notes_hit = all_reference_notes_hit
         return notes_hit_total, notes_miss_total, notes_total
-    
-    def get_notes_hit_sequence(self) -> list[bool]:
+
+    def get_notes_hit_sequence(self):
+        """
+        DEPRECATED
+        :return:
+        """
         all_reference_notes_hit = self.all_reference_notes_hit
         midi_notes_reference = self.midi_reference.get_notes_onsets()
 
@@ -380,9 +398,51 @@ class Evaluate:
                 messages.append((note, time, velocity))
                 notes_hit.append(is_note_hit)
 
-        # Sort by message time, i.e. x[0][0]
-        messages, notes_hit = zip(*sorted(zip(messages, notes_hit), key=lambda x: x[0][0]))
+        # Sort by message time, i.e. x[0][1]
+        messages, notes_hit = zip(*sorted(zip(messages, notes_hit), key=lambda x: x[0][1]))
+
         return notes_hit
+
+    def run_notes_sequential(self):
+        notes_seq_ref = self.midi_reference.notes_sequential
+        notes_seq_query = self.midi_query.notes_sequential
+
+        if len(notes_seq_ref) == 0 or len(notes_seq_query) == 0:
+            return 0, 0, 0, []
+
+        window_size = self.window_size
+
+        i, j = 0, 0
+
+        number_notes_hit, number_notes_miss = 0, 0
+        reference_notes_hit = [False for _ in notes_seq_ref]
+        while i < len(notes_seq_ref) and j < len(notes_seq_query):
+
+            # Get current note reference
+            note_reference = notes_seq_ref[i]
+
+            # Get window of query notes to check over
+            notes_query = notes_seq_query[j: j + window_size]
+            # Iterate over window of query notes to check for hit
+            note_hit = False
+            for k, note_query in enumerate(notes_query):
+                #  Within threshold
+                if note_query == note_reference:
+                    note_hit = True
+                    reference_notes_hit[i] = True
+                    i += 1
+                    j = j + k + 1  # Move j to query note after the one that matches
+                    break
+
+            if note_hit is True:
+                number_notes_hit += 1
+            else:
+                number_notes_miss += 1
+                i += 1
+
+        # Account for all reference notes that weren't checked when query notes ran out
+        number_notes_miss += len(notes_seq_ref[i:])
+        return number_notes_hit, number_notes_miss, len(notes_seq_ref), reference_notes_hit
 
 
 
@@ -524,14 +584,7 @@ def get_evaluation(ref_filename,query_filename='query',test=False):
 #     audio_reference = Audio(FILENAME_AUDIO_REFERENCE)
 #     midi_query = MidiAudio(FILENAME_MIDI_QUERY)
 
-#     synchronise = Synchronise(audio_query, audio_reference, midi_query)
-#     synchronise.plot()
-
-#     new_midi_query = synchronise.map_midi_audio()
-#     new_midi_query.export(FILENAME_MIDI_EXPORT)
-
 #     # Evaluation
 #     midi_reference = MidiAudio(FILENAME_MIDI_REFERENCE)
-#     evaluator = Evaluate(midi_reference=midi_reference, midi_query=new_midi_query)
-#     notes_hit, notes_miss, notes_total = evaluator.run()
-#     notes_hit_sequence = evaluator.get_notes_hit_sequence()
+#     evaluator = Evaluate(midi_reference=midi_reference, midi_query=midi_query)
+#     notes_hit, notes_miss, notes_total, notes_hit_sequence = evaluator.run_notes_sequential()

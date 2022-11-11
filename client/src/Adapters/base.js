@@ -21,7 +21,6 @@ export function postFile(path, blob, musicId) {
   const form = new FormData();
   form.append('file', blob, 'query_audio_file');
   form.append('music_id', musicId);
-  console.log(form);
   return fetch(base_url + path, {
     method: 'POST',
     body: form,

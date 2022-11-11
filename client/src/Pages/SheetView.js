@@ -1,12 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { IconButton, Stack } from '@mui/material';
-import { Notation, Midi } from 'react-abc';
+import { IconButton, Stack, Typography } from '@mui/material';
+import { Midi } from 'react-abc';
 import { useParams } from 'react-router-dom';
 import { get, postFile } from '../Adapters/base';
 import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
 import StopIcon from '@mui/icons-material/Stop';
+import abcjs from 'abcjs';
+import 'abcjs/abcjs-audio.css';
+
+const zip = (a, b) =>
+  Array.from(Array(Math.max(b.length, a.length)), (_, i) => [a[i], b[i]]);
 
 export default function MusicSelect() {
+  const [score, setScore] = useState(null);
   const [notation, setNotation] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [webMediaRecorder, setWebMediaRecorder] = useState(null);
@@ -17,6 +23,9 @@ export default function MusicSelect() {
     get('/api/music/select', { music_id: id })
       .then((data) => {
         setNotation(data);
+        abcjs.renderAbc('paper', data, {
+          add_classes: true,
+        });
       })
       .catch((err) => {
         console.log(`error loading selected sheet music: ${err}`);
@@ -46,6 +55,18 @@ export default function MusicSelect() {
             postFile('/api/record_audio', blob, id).then((res) => {
               // TODO: handle the response and display results
               console.log(res);
+              const numHit = res['notes_hit'];
+              const numMiss = res['notes_miss'];
+              // const numExtra = res['notes_extra'];
+              const isCorrectArr = res['notes_hit_sequence'];
+              const noteArr = document.getElementsByClassName('abcjs-note');
+              zip(isCorrectArr, noteArr).forEach((pair) => {
+                let [isCorrect, note] = pair;
+                if (!isCorrect) {
+                  note.setAttribute('fill', '#ff0000');
+                }
+              });
+              setScore([numHit, numMiss]);
             });
 
             // TODO: REMOVE everything below once ready for production, this is only for sanity check (listen to audio)
@@ -117,8 +138,19 @@ export default function MusicSelect() {
       >
         {isRecording ? <StopIcon /> : <KeyboardVoiceIcon />}
       </IconButton>
-      <Notation notation={notation} />
+      <div id='paper'></div>
+      {/* <Notation notation={notation} /> */}
       {notation && <Midi notation={notation} />}
+      {score && (
+        <>
+          <Typography variant='h6' sx={{ textAlign: 'center' }}>
+            Notes Hit: {score[0]}
+          </Typography>
+          <Typography variant='h6' sx={{ textAlign: 'center' }}>
+            Notes Missed: {score[1]}
+          </Typography>
+        </>
+      )}
       <Stack spacing={0} ref={audioClips}></Stack>
     </Stack>
   );

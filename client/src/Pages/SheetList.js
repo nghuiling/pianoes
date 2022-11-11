@@ -41,8 +41,15 @@ export default function MusicSelect() {
         <Grid container spacing={2}>
           {pieces.map((song) => {
             return (
-              <Grid item xs={12} sm={12 / 2} md={12 / 3} lg={12 / 5}>
-                <Link to={`/sheet/${song.music_id}`} key={song.music_id}>
+              <Grid
+                item
+                xs={12}
+                sm={12 / 2}
+                md={12 / 3}
+                lg={12 / 5}
+                key={song.music_id}
+              >
+                <Link to={`/sheet/${song.music_id}`}>
                   <Card
                     sx={{
                       border: 8,

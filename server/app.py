@@ -76,7 +76,7 @@ def get_score():
             file_path_webm = "./data_query/audio_files/"+'query.webm'
             f.save(file_path_webm)
             file_path = "./data_query/audio_files/"+'query.m4a'
-            subprocess.call(['ffmpeg', '-y', '-i', file_path_webm, '-vn', file_path])
+            subprocess.call(['ffmpeg', '-loglevel', 'warning', '-hide_banner', '-nostats', '-y', '-i', file_path_webm, '-vn', file_path])
 
             #params
             ref_filename = music_id

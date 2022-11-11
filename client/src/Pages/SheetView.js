@@ -43,7 +43,7 @@ export default function MusicSelect() {
           mediaRecorder.onstop = (e) => {
             const blob = new Blob(chunks, { type: 'audio/webm; codecs=vp9' });
             chunks.splice(0);
-            postFile('/api/record_audio', blob).then((res) => {
+            postFile('/api/record_audio', blob, id).then((res) => {
               // TODO: handle the response and display results
               console.log(res);
             });
@@ -86,6 +86,7 @@ export default function MusicSelect() {
 
   useEffect(() => {
     initializeMedia();
+    // eslint-disable-next-line
   }, []);
 
   const toggleRecord = (ev) => {

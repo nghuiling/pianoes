@@ -17,10 +17,10 @@ export function get(path, payload) {
     });
 }
 
-export function postFile(path, blob) {
+export function postFile(path, blob, musicId) {
   const form = new FormData();
   form.append('file', blob, 'query_audio_file');
-  form.append('music_id', '1');
+  form.append('music_id', musicId);
   console.log(form);
   return fetch(base_url + path, {
     method: 'POST',

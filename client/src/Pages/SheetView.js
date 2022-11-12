@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { IconButton, Stack, Typography } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  LinearProgress,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { Midi } from 'react-abc';
 import { useParams } from 'react-router-dom';
 import { get, postFile } from '../Adapters/base';
@@ -14,6 +20,7 @@ const zip = (a, b) =>
 export default function MusicSelect() {
   const [score, setScore] = useState(null);
   const [notation, setNotation] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [webMediaRecorder, setWebMediaRecorder] = useState(null);
   const audioClips = useRef();
@@ -24,6 +31,8 @@ export default function MusicSelect() {
       .then((data) => {
         setNotation(data);
         abcjs.renderAbc('paper', data, {
+          scale: 1.8,
+          responsive: 'resize',
           add_classes: true,
         });
       })
@@ -52,6 +61,7 @@ export default function MusicSelect() {
           mediaRecorder.onstop = (e) => {
             const blob = new Blob(chunks, { type: 'audio/webm; codecs=vp9' });
             chunks.splice(0);
+            setIsProcessing(true);
             postFile('/api/record_audio', blob, id).then((res) => {
               // TODO: handle the response and display results
               console.log(res);
@@ -67,32 +77,33 @@ export default function MusicSelect() {
                 }
               });
               setScore([numHit, numMiss]);
+              setIsProcessing(false);
             });
 
             // TODO: REMOVE everything below once ready for production, this is only for sanity check (listen to audio)
-            const clipName = `clip-${audioClips.current.children.length}`;
+            // const clipName = `clip-${audioClips.current.children.length}`;
 
             const clipContainer = document.createElement('article');
-            const clipLabel = document.createElement('p');
+            // const clipLabel = document.createElement('p');
             const audio = document.createElement('audio');
-            const deleteButton = document.createElement('button');
+            // const deleteButton = document.createElement('button');
 
             clipContainer.classList.add('clip');
             audio.setAttribute('controls', '');
-            deleteButton.innerHTML = 'Delete';
-            clipLabel.innerHTML = clipName;
+            // deleteButton.innerHTML = 'Delete';
+            // clipLabel.innerHTML = clipName;
 
             clipContainer.appendChild(audio);
-            clipContainer.appendChild(clipLabel);
-            clipContainer.appendChild(deleteButton);
+            // clipContainer.appendChild(clipLabel);
+            // clipContainer.appendChild(deleteButton);
             audioClips.current.appendChild(clipContainer);
             const audioURL = window.URL.createObjectURL(blob);
             audio.src = audioURL;
 
-            deleteButton.onclick = (e) => {
-              let evtTgt = e.target;
-              evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode);
-            };
+            // deleteButton.onclick = (e) => {
+            //   let evtTgt = e.target;
+            //   evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode);
+            // };
             // END OF REMOVE
           };
         })
@@ -120,7 +131,7 @@ export default function MusicSelect() {
   };
 
   return (
-    <Stack style={{ margin: 'auto' }} spacing={2}>
+    <Stack style={{ margin: 'auto', width: '100%' }} spacing={2}>
       <IconButton
         color='error'
         aria-label='record'
@@ -136,11 +147,20 @@ export default function MusicSelect() {
           },
         }}
       >
-        {isRecording ? <StopIcon /> : <KeyboardVoiceIcon />}
+        {isRecording ? (
+          <StopIcon />
+        ) : (
+          <KeyboardVoiceIcon disabled={isProcessing} />
+        )}
       </IconButton>
-      <div id='paper'></div>
+      <div id='paper' style={{ width: '100%' }}></div>
       {/* <Notation notation={notation} /> */}
       {notation && <Midi notation={notation} />}
+      {isProcessing && (
+        <Box sx={{ width: '100%' }}>
+          <LinearProgress />
+        </Box>
+      )}
       {score && (
         <>
           <Typography variant='h6' sx={{ textAlign: 'center' }}>
@@ -151,7 +171,7 @@ export default function MusicSelect() {
           </Typography>
         </>
       )}
-      <Stack spacing={0} ref={audioClips}></Stack>
+      <Stack spacing={0} ref={audioClips} sx={{ margin: 'auto' }}></Stack>
     </Stack>
   );
 }

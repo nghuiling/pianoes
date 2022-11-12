@@ -31,3 +31,5 @@ __pycache__
 
 # ephemeral data
 server/data_query
+
+build/
